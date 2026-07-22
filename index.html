@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12俊俊寻宝记 x 联动扩展版</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 系统导航 -->
+    <div class="sys-nav">
+        <button class="sys-btn" onclick="openPokedex()">📖 官方图鉴</button>
+        <button class="sys-btn" onclick="openInventory()">🎒 我的背包</button>
+    </div>
+
+    <h1 id="main-title">🗡️ 12俊俊寻宝记 🛡️</h1>
+    <div id="sub-title" class="subtitle">特别联动版本：[soso5王] x [快餐侠洲歌]</div>
+
+    <!-- 顶部状态栏 -->
+    <div id="top-bar" class="hidden">
+        <div>层数: <span id="ui-floor">1/12</span> - 节点: <span id="ui-stage">1/4</span></div>
+        <div class="stat-item">HP: <span id="ui-hp">100/100</span></div>
+        <div class="stat-item">攻击: <span id="ui-atk">10</span></div>
+        <div class="stat-gold">🪙 寻宝币: <span id="ui-gold">0</span></div>
+        <div class="stat-extra">暴击:<span id="ui-crit">0</span>% | 吸血:<span id="ui-life">0</span>% | 闪避:<span id="ui-dodge">0</span>%</div>
+    </div>
+
+    <!-- 选人界面 -->
+    <div id="selection-screen" class="screen">
+        <h2 class="title-text">挑选你的寻宝人</h2>
+        <div id="continue-area" class="hidden">
+            <p style="color:#10b981; font-weight:bold; margin-bottom:10px;">检测到未完成的冒险！</p>
+            <button class="action-btn" id="btn-continue" style="background:linear-gradient(90deg, #059669, #10b981);">继续游戏</button>
+            <button class="sys-btn" id="btn-delete-save" style="margin-left:10px; color:#ef4444;">删除存档</button>
+            <hr style="border-color:var(--border); margin:20px 0;">
+            <p style="color:#94a3b8;">或选择新角色开始：</p>
+        </div>
+        <div class="grid" id="char-grid"></div>
+    </div>
+
+    <!-- 地图界面 -->
+    <div id="map-screen" class="screen hidden">
+        <h2 id="map-title">准备战斗</h2>
+        <p id="map-desc" class="desc-text">前方发现敌人！</p>
+        <p id="map-ult-status" class="ult-status-text"></p>
+        <button class="action-btn" onclick="startCombat()">进入战斗</button>
+    </div>
+
+    <!-- 战斗界面 -->
+    <div id="battle-screen" class="screen hidden">
+        <div class="arena-header">
+            <span class="battle-title">⚔️ 寻宝激战中...</span>
+            <button id="speed-btn" onclick="toggleSpeed()">⏩ 1倍速</button>
+        </div>
+        <div class="arena">
+            <div class="fighter" id="player-box">
+                <div class="char-icon" id="p-icon"></div>
+                <div id="p-name" class="char-name">玩家</div>
+                <div class="hp-bar-bg"><div class="hp-bar-fill" id="p-hp-bar"></div></div>
+                <div id="p-hp-text" class="hp-text">100/100</div>
+            </div>
+            <div class="vs">VS</div>
+            <div class="fighter" id="enemy-box">
+                <div class="char-icon" id="e-icon"></div>
+                <div id="e-name" class="char-name">敌人</div>
+                <div class="hp-bar-bg"><div class="hp-bar-fill" id="e-hp-bar"></div></div>
+                <div id="e-hp-text" class="hp-text">100/100</div>
+            </div>
+        </div>
+        
+        <!-- 技能按钮区 -->
+        <button id="ult-btn" onclick="castUltimate()" disabled>终结技：未就绪</button>
+        <button id="zhen-btn" onclick="castZhenZhen()" disabled>❓ 镇镇之力 (未解锁)</button>
+        
+        <div id="log-box"></div>
+        <button class="action-btn hidden" id="battle-end-btn" onclick="endCombat()">继续寻宝</button>
+    </div>
+
+    <!-- 奖励界面 -->
+    <div id="reward-screen" class="screen hidden">
+        <h2 class="title-text">战斗胜利！</h2>
+        <p>搜刮到了 <span class="stat-gold" id="reward-gold-text"></span> 🪙寻宝币。选择你的战利品：</p>
+        <div class="choice-container" id="reward-container"></div>
+    </div>
+
+    <!-- 商店界面 -->
+    <div id="shop-screen" class="screen hidden">
+        <h2 class="title-text">神秘补给站 (层数休整)</h2>
+        <p>你的【终结技】与【镇镇之力】已在进入本层时重置！</p>
+        <div class="choice-container" id="shop-container"></div>
+        <button class="action-btn" onclick="nextFloor()">离开营地，深入下一层</button>
+    </div>
+
+    <!-- 游戏结束 -->
+    <div id="game-over-screen" class="screen hidden">
+        <h1 id="end-title"></h1>
+        <p id="end-desc" class="desc-text"></p>
+        <button class="action-btn" onclick="location.reload()">重新开始寻宝</button>
+    </div>
+
+    <!-- 图鉴模态框 -->
+    <div id="modal-pokedex" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closePokedex()">×</button>
+            <h2 class="title-text" style="margin-top:0;">📖 官方图鉴 (长按可滑动)</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchDexTab('dex-chars')">寻宝人</button>
+                <button class="tab-btn" onclick="switchDexTab('dex-mobs')">怪物群</button>
+                <button class="tab-btn" onclick="switchDexTab('dex-items')">全道具/系统</button>
+            </div>
+            <div id="dex-chars" class="pokedex-list"></div>
+            <div id="dex-mobs" class="pokedex-list hidden"></div>
+            <div id="dex-items" class="pokedex-list hidden"></div>
+        </div>
+    </div>
+
+    <!-- 背包模态框 -->
+    <div id="modal-inventory" class="modal-overlay hidden">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeInventory()">×</button>
+            <h2 class="title-text" style="margin-top:0;">🎒 我的背包 (已获唯一道具)</h2>
+            <div id="inv-container" class="inventory-list"></div>
+        </div>
+    </div>
+
+    <!-- 引入核心逻辑 -->
+    <script src="data.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
